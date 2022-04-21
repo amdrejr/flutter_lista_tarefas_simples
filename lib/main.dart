@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '/tela.dart';
+import 'app_design.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    home: MyApp(),
-  ));
+  runApp(
+    const MaterialApp(
+      home: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -17,11 +20,11 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('App Bar!'),
+    return const SafeArea(
+      child: Scaffold(
+        backgroundColor: AppColor.backgroundAppColor,
+        body: TelaInicial(),
       ),
-      body: const TelaInicial(),
     );
   }
 }

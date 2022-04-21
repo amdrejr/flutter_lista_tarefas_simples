@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'app_design.dart';
+
+String? errorText;
+
 class TelaInicial extends StatefulWidget {
   const TelaInicial({Key? key}) : super(key: key);
 
@@ -45,51 +49,88 @@ class _TelaInicialState extends State<TelaInicial> {
   late DateTime agora;
   TextEditingController textController = TextEditingController();
 
-  int index = 0;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             children: [
               Expanded(
-                  child: TextField(
-                controller: textController,
-              )),
+                child: TextField(
+                  decoration: inputDecorat(),
+                  controller: textController,
+                ),
+              ),
+              const SizedBox(width: 10),
               ElevatedButton(
+                style: appButtonStyle(),
                 onPressed: () {
                   if (textController.text.isNotEmpty) {
-                    setState(() {
-                      agora = DateTime.now();
-                      lista.add({
-                        'title': textController.text,
-                        'date': DateFormat('dd/MM/yyyy - kk:mm').format(agora),
-                        'ok': false,
-                      });
-                      index++;
-                    });
+                    setState(
+                      () {
+                        errorText = null;
+                        agora = DateTime.now();
+                        lista.add(
+                          {
+                            'title': textController.text,
+                            'date':
+                                DateFormat('dd/MM/yyyy - kk:mm').format(agora),
+                            'ok': false,
+                          },
+                        );
+                      },
+                    );
                     textController.clear();
+                  } else {
+                    setState(
+                      () {
+                        errorText = 'Digite para adicionar!';
+                      },
+                    );
                   }
                 },
-                child: const Text('Salvar'),
+                child: const Icon(Icons.add_outlined, size: 30),
               )
             ],
           ),
           const SizedBox(height: 25),
-          Expanded(
+          Flexible(
             child: RefreshIndicator(
               onRefresh: _refresh,
-              child: ListView.builder(
-                itemCount: lista.length,
-                itemBuilder: listItemCreate,
+              child: Container(
+                padding: lista.isNotEmpty ? const EdgeInsets.all(8) : null,
+                decoration: BoxDecoration(
+                  gradient: const RadialGradient(
+                    tileMode: TileMode.mirror,
+                    colors: [
+                      AppColor.backgroundAppColor,
+                      Colors.white,
+                      AppColor.backgroundAppColor,
+                      AppColor.backgroundColor,
+                      AppColor.backgroundAppColor,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                  border: lista.isNotEmpty
+                      ? Border.all(color: AppColor.primary, width: 1.2)
+                      : null,
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: lista.length,
+                  itemBuilder: listItemCreate,
+                ),
               ),
             ),
           ),
           lista.isNotEmpty
-              ? ElevatedButton(
+              ? TextButton(
+                  style: ButtonStyle(
+                      foregroundColor:
+                          MaterialStateProperty.all(AppColor.primary)),
                   onPressed: () {
                     showDialog(
                         context: context,
@@ -97,27 +138,36 @@ class _TelaInicialState extends State<TelaInicial> {
                           return AlertDialog(
                             title: const Text('Limpar Lista'),
                             content: const Text(
-                                'Deseja excluir todos itens da lista? Essa ação é irreversível.'),
+                                'Deseja excluir todos itens da lista? Esta ação é irreversível.'),
                             actions: [
                               TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // Apagar Alert
-                                  },
-                                  child: Text('Cancelar')),
+                                onPressed: () {
+                                  Navigator.pop(context); // Apagar Alert
+                                },
+                                child: const Text(
+                                  'Cancelar',
+                                  style: TextStyle(color: AppColor.primary),
+                                ),
+                              ),
                               TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    setState(() {
-                                      lista.clear();
-                                    });
-                                  },
-                                  child: Text('Confirmar')),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    lista.clear();
+                                  });
+                                },
+                                child: const Text(
+                                  'Confirmar',
+                                  style: TextStyle(color: AppColor.primary),
+                                ),
+                              )
                             ],
                             elevation: 24,
                           );
                         });
                   },
-                  child: const Text('Limpar tudo'),
+                  child:
+                      const Text('Limpar tudo', style: TextStyle(fontSize: 16)),
                 )
               : Container(),
         ],
@@ -128,7 +178,7 @@ class _TelaInicialState extends State<TelaInicial> {
   Widget listItemCreate(context, index) {
     return Padding(
       key: Key(DateTime.now().microsecond.toString()),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8, right: 8),
       child: Dismissible(
         key: const Key('oioioi'),
         direction: DismissDirection.endToStart,
@@ -174,6 +224,7 @@ class _TelaInicialState extends State<TelaInicial> {
                     'Tarefa ${_lastRemoved['title']} removida com sucesso!'),
                 action: SnackBarAction(
                   label: 'Desfazer',
+                  textColor: AppColor.primary,
                   onPressed: () {
                     setState(() {
                       lista.insert(_lastRemovedPosition, _lastRemoved);
@@ -215,7 +266,7 @@ class _TelaInicialState extends State<TelaInicial> {
             ),
           ),
           Checkbox(
-            checkColor: Colors.white,
+            activeColor: Colors.green,
             value: lista[index]['ok'],
             onChanged: (bool? value) {
               setState(() {
@@ -223,8 +274,7 @@ class _TelaInicialState extends State<TelaInicial> {
               });
             },
           ),
-          Icon(Icons.arrow_back_ios,
-              color: ButtonTheme.of(context).colorScheme!.primary)
+          const Icon(Icons.arrow_back_ios, color: AppColor.primary)
         ],
       ),
     );
