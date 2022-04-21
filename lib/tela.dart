@@ -12,8 +12,9 @@ class _TelaInicialState extends State<TelaInicial> {
   List lista = [];
   Map<String, dynamic> _lastRemoved = {};
   late int _lastRemovedPosition;
+  bool clique = false;
 
-  late DateTime agora = DateTime.now();
+  late DateTime agora;
   TextEditingController textController = TextEditingController();
 
   int index = 0;
@@ -34,9 +35,11 @@ class _TelaInicialState extends State<TelaInicial> {
                 onPressed: () {
                   if (textController.text.isNotEmpty) {
                     setState(() {
+                      agora = DateTime.now();
                       lista.add({
                         'title': textController.text,
-                        'date': DateFormat('dd-MM-yyyy').format(agora),
+                        'date': DateFormat('dd/MM/yyyy - kk:mm').format(agora),
+                        'ok': false,
                       });
                       index++;
                     });
@@ -67,7 +70,7 @@ class _TelaInicialState extends State<TelaInicial> {
               onPressed: () {
                 print(lista);
               },
-              child: Text('teste')),
+              child: const Text('teste')),
         ],
       ),
     );
@@ -83,11 +86,19 @@ class _TelaInicialState extends State<TelaInicial> {
         background: Container(
           decoration: BoxDecoration(
             color: Colors.red,
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: const [
+              Text(
+                'Remover',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(width: 5),
               Icon(Icons.delete, color: Colors.white, size: 30),
               SizedBox(width: 15),
             ],
@@ -96,16 +107,34 @@ class _TelaInicialState extends State<TelaInicial> {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(10),
             boxShadow: const [
               BoxShadow(blurRadius: 2),
             ],
           ),
           child: ListTile(
-            leading: const Icon(Icons.cabin),
-            title: Text(lista[index]['title']),
-            trailing: Text(lista[index]['date']),
-          ),
+              minLeadingWidth: 20,
+              dense: true,
+              leading: lista[index]['ok']
+                  ? const Icon(Icons.check, color: Colors.grey, size: 30)
+                  : Icon(Icons.do_disturb_on_outlined,
+                      color: Colors.amber[400], size: 30),
+              title: Text(lista[index]['title'],
+                  style: const TextStyle(fontSize: 16)),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(lista[index]['date']),
+              ),
+              trailing: Checkbox(
+                checkColor: Colors.white,
+                value: clique,
+                onChanged: (bool? value) {
+                  setState(() {
+                    clique = value!;
+                    print(clique);
+                  });
+                },
+              )),
         ),
         onDismissed: (direction) {
           setState(() {
@@ -130,5 +159,19 @@ class _TelaInicialState extends State<TelaInicial> {
         },
       ),
     );
+  }
+}
+
+class ListItemCreate extends StatefulWidget {
+  const ListItemCreate({Key? key}) : super(key: key);
+
+  @override
+  State<ListItemCreate> createState() => _ListItemCreateState();
+}
+
+class _ListItemCreateState extends State<ListItemCreate> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }

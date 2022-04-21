@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '/tela.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: MyApp(),
   ));
 }
@@ -21,7 +21,7 @@ class _MyAppState extends State<MyApp> {
       appBar: AppBar(
         title: const Text('App Bar!'),
       ),
-      body: TelaInicial(),
+      body: const TelaInicial(),
     );
   }
 }
