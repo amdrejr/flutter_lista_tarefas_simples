@@ -9,6 +9,34 @@ class TelaInicial extends StatefulWidget {
 }
 
 class _TelaInicialState extends State<TelaInicial> {
+  Future _refresh() async {
+    // Esperar 0.3 sec, só pra ficar bonito
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    setState(
+      () {
+        // Ordena a lista de acordo com a função adicionada
+        // a e b são os index que serão comparados
+        //
+        lista.sort(
+          (a, b) {
+            if (a['ok'] && !b['ok']) {
+              // elemento 'a' é 'maior', portanto, será empurrado para o final
+              // lembrando que é uma lista ordenada, então começa do menor para o maior
+              return 1;
+            } else if (!a['ok'] && b['ok']) {
+              // elemento 'b' é maior, então, 'a' virá primeiro que o 'b'
+              return -1;
+            } else {
+              // Se iguais, nada muda
+              return 0;
+            }
+          },
+        );
+      },
+    );
+  }
+
   List lista = [];
   Map<String, dynamic> _lastRemoved = {};
   late int _lastRemovedPosition;
@@ -53,9 +81,12 @@ class _TelaInicialState extends State<TelaInicial> {
           const SizedBox(height: 25),
           const Icon(Icons.person),
           Expanded(
-            child: ListView.builder(
-              itemCount: lista.length,
-              itemBuilder: listItemCreate,
+            child: RefreshIndicator(
+              onRefresh: _refresh,
+              child: ListView.builder(
+                itemCount: lista.length,
+                itemBuilder: listItemCreate,
+              ),
             ),
           ),
           ElevatedButton(
@@ -116,7 +147,7 @@ class _TelaInicialState extends State<TelaInicial> {
               minLeadingWidth: 20,
               dense: true,
               leading: lista[index]['ok']
-                  ? const Icon(Icons.check, color: Colors.grey, size: 30)
+                  ? const Icon(Icons.check, color: Colors.green, size: 30)
                   : Icon(Icons.do_disturb_on_outlined,
                       color: Colors.amber[400], size: 30),
               title: Text(lista[index]['title'],
@@ -127,11 +158,10 @@ class _TelaInicialState extends State<TelaInicial> {
               ),
               trailing: Checkbox(
                 checkColor: Colors.white,
-                value: clique,
+                value: lista[index]['ok'],
                 onChanged: (bool? value) {
                   setState(() {
-                    clique = value!;
-                    print(clique);
+                    lista[index]['ok'] = value!;
                   });
                 },
               )),
