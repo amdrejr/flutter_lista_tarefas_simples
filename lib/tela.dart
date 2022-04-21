@@ -79,7 +79,6 @@ class _TelaInicialState extends State<TelaInicial> {
             ],
           ),
           const SizedBox(height: 25),
-          const Icon(Icons.person),
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refresh,
@@ -89,19 +88,38 @@ class _TelaInicialState extends State<TelaInicial> {
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                lista.clear();
-              });
-            },
-            child: const Text('Limpar tudo'),
-          ),
-          TextButton(
-              onPressed: () {
-                print(lista);
-              },
-              child: const Text('teste')),
+          lista.isNotEmpty
+              ? ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Limpar Lista'),
+                            content: const Text(
+                                'Deseja excluir todos itens da lista? Essa ação é irreversível.'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // Apagar Alert
+                                  },
+                                  child: Text('Cancelar')),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    setState(() {
+                                      lista.clear();
+                                    });
+                                  },
+                                  child: Text('Confirmar')),
+                            ],
+                            elevation: 24,
+                          );
+                        });
+                  },
+                  child: const Text('Limpar tudo'),
+                )
+              : Container(),
         ],
       ),
     );
@@ -136,41 +154,20 @@ class _TelaInicialState extends State<TelaInicial> {
           ),
         ),
         child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: const [
-              BoxShadow(blurRadius: 2),
-            ],
-          ),
-          child: ListTile(
-              minLeadingWidth: 20,
-              dense: true,
-              leading: lista[index]['ok']
-                  ? const Icon(Icons.check, color: Colors.green, size: 30)
-                  : Icon(Icons.do_disturb_on_outlined,
-                      color: Colors.amber[400], size: 30),
-              title: Text(lista[index]['title'],
-                  style: const TextStyle(fontSize: 16)),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(lista[index]['date']),
-              ),
-              trailing: Checkbox(
-                checkColor: Colors.white,
-                value: lista[index]['ok'],
-                onChanged: (bool? value) {
-                  setState(() {
-                    lista[index]['ok'] = value!;
-                  });
-                },
-              )),
-        ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: const [
+                BoxShadow(blurRadius: 2),
+              ],
+            ),
+            child: melhor(context, index)),
         onDismissed: (direction) {
           setState(() {
             _lastRemoved = lista[index];
             _lastRemovedPosition = index;
             lista.removeAt(index);
+            ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -187,6 +184,48 @@ class _TelaInicialState extends State<TelaInicial> {
             );
           });
         },
+      ),
+    );
+  }
+
+  Widget melhor(context, index) {
+    return Container(
+      padding: const EdgeInsets.only(top: 10, bottom: 10, left: 10),
+      child: Row(
+        children: [
+          lista[index]['ok']
+              ? const Icon(Icons.check, color: Colors.green, size: 30)
+              : Icon(Icons.do_disturb_on_outlined,
+                  color: Colors.amber[400], size: 30),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  lista[index]['title'],
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  lista[index]['date'],
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          Checkbox(
+            checkColor: Colors.white,
+            value: lista[index]['ok'],
+            onChanged: (bool? value) {
+              setState(() {
+                lista[index]['ok'] = value!;
+              });
+            },
+          ),
+          Icon(Icons.arrow_back_ios,
+              color: ButtonTheme.of(context).colorScheme!.primary)
+        ],
       ),
     );
   }
