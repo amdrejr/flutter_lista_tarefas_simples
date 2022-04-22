@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'app_design.dart';
+import 'app_repository.dart';
 
 String? errorText;
 
@@ -13,6 +14,18 @@ class TelaInicial extends StatefulWidget {
 }
 
 class _TelaInicialState extends State<TelaInicial> {
+  final AppRepository todoRepositorio = AppRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    todoRepositorio.getTodoList().then((value) {
+      setState(() {
+        lista = value;
+      });
+    });
+  }
+
   Future _refresh() async {
     // Esperar 0.3 sec, só pra ficar bonito
     await Future.delayed(const Duration(milliseconds: 300));
@@ -84,6 +97,7 @@ class _TelaInicialState extends State<TelaInicial> {
                       },
                     );
                     textController.clear();
+                    todoRepositorio.saveTodoList(lista);
                   } else {
                     setState(
                       () {
@@ -154,6 +168,7 @@ class _TelaInicialState extends State<TelaInicial> {
                                   Navigator.pop(context);
                                   setState(() {
                                     lista.clear();
+                                    todoRepositorio.saveTodoList(lista);
                                   });
                                 },
                                 child: const Text(
@@ -228,11 +243,13 @@ class _TelaInicialState extends State<TelaInicial> {
                   onPressed: () {
                     setState(() {
                       lista.insert(_lastRemovedPosition, _lastRemoved);
+                      todoRepositorio.saveTodoList(lista);
                     });
                   },
                 ),
               ),
             );
+            todoRepositorio.saveTodoList(lista);
           });
         },
       ),
